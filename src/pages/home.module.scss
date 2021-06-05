@@ -1,24 +1,31 @@
-.container {
-  max-width: 1120px;
-  margin: 0 auto;
-  // margin-top: 4rem;
-}
-
 .posts {
-  max-width: 720px;
-  margin: 0 auto;
+
+  margin-bottom: 2rem;
 
   a {
+    position: relative;
     display: block;
+    background-color: var(--gray-900);
+    transition: filter 0.3s;
+
+    &:hover {
+      filter: brightness(0.95);
+    }
+
+
+    &:hover strong {
+      color: var(--pink-500);
+    }
 
     & + a {
-      margin-top: 3.5rem;
+      margin-top: 3rem;
     }
 
     strong {
-      font-size: 1.75rem;
+      font-size: 1.7rem;
       font-weight: 700;
       color: var(--white-200);
+      transition: color 0.5s;
     }
 
     p {
@@ -38,16 +45,97 @@
 
       div {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
+
 
         time, span {
-          margin-left: 0.2rem;
+          margin-right: 0.5rem;
+          color: var(--gray-150);
+          font-size: 0.875rem;
         }
 
         & + div {
-          margin-left: 2rem;
+          margin-left: 1.5rem;
         }
       }
+    }
+  }
+
+  .loadMore {
+
+    margin-top: 4rem;
+
+    button {
+      color: var(--pink-500);
+      background: none;
+      border: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+  }
+}
+
+
+// Spinner
+
+.spinner {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 40px;
+
+  div {
+    position: absolute;
+    top: 33px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--pink-500);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+
+  div:nth-child(1) {
+    left: 8px;
+    animation: lds-ellipsis1 0.4s infinite;
+  }
+
+  div:nth-child(2) {
+    left: 8px;
+    animation: lds-ellipsis2 0.4s infinite;
+  }
+
+  div:nth-child(3) {
+    left: 32px;
+    animation: lds-ellipsis2 0.4s infinite;
+  }
+
+  div:nth-child(4) {
+    left: 56px;
+    animation: lds-ellipsis3 0.4s infinite;
+  }
+
+  @keyframes lds-ellipsis1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes lds-ellipsis3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  @keyframes lds-ellipsis2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(16px, 0);
     }
   }
 }

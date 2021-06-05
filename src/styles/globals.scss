@@ -8,12 +8,15 @@
   --white: #ffffff;
   --white-200: #F8F8F8;
 
+  --pink-500: #FF57B2;
+
   --gray-100: #e1e1e6;
+  --gray-150: #BBBBBB;
   --gray-200: #D7D7D7;
   // --gray-300: #a8a8b3;
-  // --gray-700: #323238;
+  --gray-700: #323238;
   // --gray-800: #29292e;
-  // --gray-850: #1f2729;
+  //--gray-850: #1f2729;
   --gray-900: #1A1D23;
 
   // --cyan-500: #61dafb;
@@ -32,6 +35,22 @@ html {
 body {
   background: var(--gray-900);
   color: var(--white-200);
+
+  &::-webkit-scrollbar {
+    width: 0.4rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px var(--gray-900);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: var(--gray-700);
+    outline: 1px solid var(--gray-700);
+  }
+
+
 }
 
 body, input, textarea, select, button {

@@ -1,1 +1,96 @@
-// TODO
+
+
+
+.post {
+
+  margin-bottom: 2rem;
+
+  .imageContainer {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      flex: 1;
+    }
+  }
+
+  .title {
+    color: var(--white);
+    font-size: 3rem;
+    font-weight: 700;
+
+    margin-top: 5rem;
+    word-wrap: break-word;
+  }
+
+  .postInfo {
+    margin-top: 1.5rem;
+
+    ul {
+      list-style: none;
+      display: flex;
+
+      align-items: center;
+
+      li {
+        font-size: 0.875rem;
+        color: var(--gray-150);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+
+        & + li {
+          margin-left: 1.5rem;
+        }
+
+        svg {
+          margin-right: 0.5rem;
+        }
+
+        &:last-child {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+
+  main {
+    margin-top: 4rem;
+    color: var(--white-200);
+    line-height: 1.575rem;
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 4rem;
+      line-height: 2.5rem;
+    }
+
+    & > {
+      div:last-child {
+        margin-top: 4rem;
+      }
+    }
+
+    p {
+
+      text-indent: 1rem;
+
+      & + p {
+        margin-top: 1.575rem;
+      }
+
+      img {
+        width: 100%;
+      }
+    }
+
+  }
+}
