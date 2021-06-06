@@ -1,23 +1,29 @@
-/* eslint-disable no-useless-escape */
 /* eslint-disable react/no-danger */
+/* eslint-disable no-useless-escape */
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Prismic from '@prismicio/client';
-import { format } from 'date-fns';
+import { format, isEqual } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import PrismicDOM from 'prismic-dom';
 
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { url } from 'inspector';
 import Header from '../../components/Header';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { Comments } from '../../components/Comments';
 
 interface Post {
-  readingTime: string;
+  uid?: string;
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -34,31 +40,54 @@ interface Post {
 }
 interface PostProps {
   post: Post;
+  prevPost: Post;
+  nextPost: Post;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  prevPost,
+  nextPost,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
     return <div>Carregando...</div>;
   }
 
-  const first_publication_date_formatted = format(
-    new Date(post.first_publication_date),
-    'dd MMM yyyy'
-  ).toLowerCase();
+  const first_publication_date_formatted = post.first_publication_date
+    ? format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+        locale: ptBR,
+      }).toLowerCase()
+    : null;
 
-  const readingTime = `${Math.ceil(
+  const last_publication_date_formatted = isEqual(
+    new Date(post.first_publication_date || null),
+    new Date(post.last_publication_date || null)
+  )
+    ? null
+    : format(
+        zonedTimeToUtc(
+          new Date(post.last_publication_date || null),
+          'America/Cuiaba'
+        ),
+        "'* editado em' dd MMM yyyy', às' HH:mm",
+        {
+          locale: ptBR,
+        }
+      ).toLowerCase();
+
+  const calcReadingTime = Math.ceil(
     post.data.content
-      .map(
-        content =>
-          `${content.heading} ${PrismicDOM.RichText.asText(content.body)}`
-      )
+      .map(content => {
+        return `${content.heading} ${PrismicDOM.RichText.asText(content.body)}`;
+      })
       .join(', ')
       .replace(/[.,\/#!$%\^&\*;:{}=?\-_'()]/g, '')
       .replace(/\s{2,}/g, '')
       .split(' ').length / 200
-  )} min`;
+  );
+  const readingTime = `${String(calcReadingTime)} min`;
 
   return (
     <>
@@ -67,8 +96,11 @@ export default function Post({ post }: PostProps): JSX.Element {
       </Head>
       <Header />
       <article className={styles.post}>
-        <figure className={styles.imageContainer}>
-          <img src={post.data.banner.url} alt={post.data.title} />
+        <figure
+          className={styles.imageContainer}
+          style={{ backgroundImage: `url("${post.data.banner.url}")` }}
+        >
+          {/* <img src={post.data.banner.url} alt={post.data.title} /> */}
         </figure>
         <div className={commonStyles.container}>
           <div className={commonStyles.content}>
@@ -89,6 +121,9 @@ export default function Post({ post }: PostProps): JSX.Element {
                     <span>{readingTime}</span>
                   </li>
                 </ul>
+                {last_publication_date_formatted && (
+                  <span>{last_publication_date_formatted}</span>
+                )}
               </section>
             </header>
             <main>
@@ -96,9 +131,9 @@ export default function Post({ post }: PostProps): JSX.Element {
                 <h1>{post.data.content[0]?.heading}</h1>
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: PrismicDOM.RichText.asHtml(
-                      post.data.content[0]?.body
-                    ),
+                    __html:
+                      post.data.content[0].body &&
+                      PrismicDOM.RichText.asHtml(post.data.content[0]?.body),
                   }}
                 />
               </div>
@@ -106,9 +141,9 @@ export default function Post({ post }: PostProps): JSX.Element {
                 <h1>{post.data.content[1]?.heading}</h1>
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: PrismicDOM.RichText.asHtml(
-                      post.data.content[1]?.body
-                    ),
+                    __html:
+                      post.data.content[1]?.body &&
+                      PrismicDOM.RichText.asHtml(post.data.content[1]?.body),
                   }}
                 />
               </div>
@@ -116,6 +151,37 @@ export default function Post({ post }: PostProps): JSX.Element {
           </div>
         </div>
       </article>
+
+      <div className={commonStyles.container}>
+        <div className={commonStyles.content}>
+          <aside className={styles.sectionPrevNext}>
+            <div className={styles.containerPrevNext}>
+              {prevPost.uid ? (
+                <Link href={prevPost.uid}>
+                  <a>
+                    <span>{prevPost.data?.title}</span>
+                    <span>Post anterior</span>
+                  </a>
+                </Link>
+              ) : (
+                <div />
+              )}
+              {nextPost.uid ? (
+                <Link href={nextPost.uid}>
+                  <a>
+                    <span>{nextPost.data?.title}</span>
+                    <span>Próximo post</span>
+                  </a>
+                </Link>
+              ) : (
+                <div />
+              )}
+            </div>
+          </aside>
+
+          <Comments />
+        </div>
+      </div>
     </>
   );
 }
@@ -146,8 +212,33 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
       notFound: true,
     };
   }
+
+  const prevPostResponse = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: responsePost.id,
+      orderings: '[document.first_publication_date desc]',
+      fetch: ['posts.uid', 'posts.title'],
+    }
+  );
+
+  const nextPostResponse = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: responsePost.id,
+      orderings: '[document.first_publication_date]',
+      fetch: ['posts.uid', 'posts.title'],
+    }
+  );
+
   return {
-    props: { post: { ...responsePost } },
+    props: {
+      post: { ...responsePost },
+      prevPost: { ...prevPostResponse.results[0] },
+      nextPost: { ...nextPostResponse.results[0] },
+    },
     revalidate: 1, // 1 second
   };
 };
