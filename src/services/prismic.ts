@@ -6,6 +6,5 @@ export function getPrismicClient(req?: unknown): DefaultClient {
     req,
     accessToken: process.env.PRISMIC_ACCESS_TOKEN,
   });
-
   return prismic;
 }

@@ -58,12 +58,13 @@ export default function Post({
     return <div>Carregando...</div>;
   }
 
-  const first_publication_date_formatted = post.first_publication_date
-    ? format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-        locale: ptBR,
-      }).toLowerCase()
-    : null;
-
+  const first_publication_date_formatted = format(
+    new Date(post?.first_publication_date || new Date()),
+    'dd MMM yyyy',
+    {
+      locale: ptBR,
+    }
+  ).toLowerCase();
   const last_publication_date_formatted = isEqual(
     new Date(post.first_publication_date || null),
     new Date(post.last_publication_date || null)
@@ -208,9 +209,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
+export const getStaticProps: GetStaticProps = async ({
+  preview = false,
+  previewData,
+  params: { slug },
+}) => {
   const prismic = getPrismicClient();
-  const responsePost = await prismic.getByUID('posts', String(slug), {});
+  const responsePost = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   if (!responsePost) {
     return {
@@ -225,6 +232,7 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
       after: responsePost.id,
       orderings: '[document.first_publication_date desc]',
       fetch: ['posts.uid', 'posts.title'],
+      ref: previewData?.ref ?? null,
     }
   );
 
@@ -235,6 +243,7 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
       after: responsePost.id,
       orderings: '[document.first_publication_date]',
       fetch: ['posts.uid', 'posts.title'],
+      ref: previewData?.ref ?? null,
     }
   );
 
@@ -243,6 +252,7 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
       post: { ...responsePost },
       prevPost: { ...prevPostResponse.results[0] },
       nextPost: { ...nextPostResponse.results[0] },
+      preview,
     },
     revalidate: 1, // 1 second
   };
