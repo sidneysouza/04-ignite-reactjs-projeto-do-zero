@@ -19,6 +19,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { Comments } from '../../components/Comments';
+import { ButtonPreview } from '../../components/ButtonPreview';
 
 interface Post {
   uid?: string;
@@ -42,12 +43,14 @@ interface PostProps {
   post: Post;
   prevPost: Post;
   nextPost: Post;
+  preview: boolean;
 }
 
 export default function Post({
   post,
   prevPost,
   nextPost,
+  preview = true,
 }: PostProps): JSX.Element {
   const router = useRouter();
 
@@ -180,6 +183,8 @@ export default function Post({
           </aside>
 
           <Comments />
+
+          {preview && <ButtonPreview />}
         </div>
       </div>
     </>

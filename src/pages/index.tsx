@@ -13,6 +13,7 @@ import Header from '../components/Header';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import { ButtonPreview } from '../components/ButtonPreview';
 
 interface Post {
   uid?: string;
@@ -32,10 +33,12 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
 export default function Home({
   postsPagination: { next_page, results },
+  preview = true,
 }: HomeProps): JSX.Element {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextPage, setNextPage] = useState(next_page);
@@ -131,6 +134,8 @@ export default function Home({
               </div>
             )}
           </div>
+
+          {preview && <ButtonPreview />}
         </div>
       </main>
     </>
